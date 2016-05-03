@@ -114,6 +114,32 @@ def CallWebPage(domain, page, ip, method):
 	return headers,body;
 
 
+def antibodi(body, headers):
+	id = str(random.randint(00000000,99999999));
+        bname = domain+"-"+id+".out";
+        hname = domain+"-headers-"+id+".out";
+
+        print "";
+        if ( stdout_body_flag or stdout_headers_flag ):
+                print "Domain:\t\t" + domain;
+                print "Page:\t\t" + request_page;
+                print "Real Ip:\t" + remote_ip;
+                print "Request Ip:\t" + ip;
+
+                if ( stdout_headers_flag ):
+                        print "Headers:\n";
+                        print headers;
+                if ( stdout_body_flag ):
+                        print "\nBody:\n";
+                        print body;
+        else:
+                out_file=open(bname, "w");
+                out_file.write(body);
+                out_file.close();
+                out_file=open(hname, "w");
+                out_file.write(headers);
+                out_file.close();
+
 	
 
 ####### MAIN ##########################
@@ -144,59 +170,14 @@ if ( methodloop_flag != 1 ):
 
 	headers,body = CallWebPage(domain, request_page, ip, http_methods[0]);
 
-	id = str(random.randint(00000000,99999999));
-	bname = domain+"-"+id+".out";
-	hname = domain+"-headers-"+id+".out";
-	
-        print "";
-        if ( stdout_body_flag or stdout_headers_flag ):
-		print "Domain:\t\t" + domain;
-		print "Page:\t\t" + request_page;
-		print "Real Ip:\t" + remote_ip;
-		print "Request Ip:\t" + ip;
-
-        	if ( stdout_headers_flag ):
-       			print "Headers:\n";
-      			print headers;
-          	if ( stdout_body_flag ):
-               		print "\nBody:\n";
-               		print body;
-    	else:
-        	out_file=open(bname, "w");
-        	out_file.write(body);
-        	out_file.close();
-        	out_file=open(hname, "w");
-          	out_file.write(headers);
-          	out_file.close();
+	antibodi(body,headers);
 else:
 	for method in http_methods:
 		print method;
-
 		remote_ip = getAddr(domain);
 		if ( arg_ip != None ): ip = arg_ip;
 		else: ip = remote_ip;
 	        headers,body = CallWebPage(domain, request_page, ip, method);
-
-        	id = str(random.randint(00000000,99999999));
-        	bname = domain+"-"+id+"-"+method+".out";
-        	hname = domain+"-headers-"+id+"-"+method+".out";
-
-		print "";
-		if ( stdout_body_flag or stdout_headers_flag ):
-			if ( stdout_headers_flag ): 
-				print "Headers:\n";
-				print headers;
-			if ( stdout_body_flag ):
-				print "\nBody:\n";
-				print body;
-		else:
-	        	out_file=open(bname, "w");
-        		out_file.write(body);
-        		out_file.close();
-
-        		out_file=open(hname, "w");
-        		out_file.write(headers);
-        		out_file.close();
-
+		antibodi(body, headers);
 
 ####   END ###################################
