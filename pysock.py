@@ -2,6 +2,7 @@
 import socket
 import sys
 from urlparse import urlparse
+#https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
 
 
 sysarg="";
