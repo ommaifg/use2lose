@@ -14,14 +14,16 @@ dbg = 1;
 protocol = None;
 domain = None;
 request_page = None;
-http_methods = ["GET", "HEAD", "CHECKOUT", "PUT", "DELETE", "POST", "LINK", "UNLINK", "CHECKIN", "TEXTSEARCH", "SPACEJUMP", "SEARCH",  "TRACE", "OPTIONS", "08HJAE98134", "                                                                            " ]
-http_options = ["HTTP/1.1","Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.0.1) Gecko/20060111 Firefox/1.5.0.1"];
+http_methods = ["GET", "HEAD", "CHECKOUT", "PUT", "DELETE", "POST", "LINK", "UNLINK", "CHECKIN", "TEXTSEARCH", "SPACEJUMP", "SEARCH",  "TRACE", "OPTIONS", "08HJAE98134"];
+http_options = {'version':"HTTP/1.1",'ua':"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.0.1) Gecko/20060111 Firefox/1.5.0.1"};
 # global variables
 arg_requested_url = None;
 arg_ip = None;
 
 # flags
 methodloop_flag = 0;
+stdout_body_flag = 0;
+stdout_headers_flag = 0;
 
 # functions
 def split_url(full_uri):
@@ -59,7 +61,7 @@ def CallWebPage(domain, page, ip, method):
 
 	s = createSocket(protocol);
 
-	message = method  + " /" + page + " " + http_options[0] + "\r\nConnection: Keep-Alive\r\n" + http_options[1] + "\r\nHost: " + domain + "\r\n\r\n"; 
+	message = method  + " /" + page + " " + http_options['version'] + "\r\nConnection: Keep-Alive\r\n" + http_options['ua'] + "\r\nHost: " + domain + "\r\n\r\n"; 
 	s.connect((ip, 80));
 
 	try:
@@ -109,7 +111,11 @@ if ( len(sys.argv) > 1 ):
                 	arg_ip=sys.argv[i+1];
 		if ( sysarg in ["--loopmethods", "-lp"] ):
 			methodloop_flag = 1;
-			print methodloop_flag;
+		if ( sysarg in ["--stdout-body", "-sob"] ):
+			stdout_body_flag = 1;
+		if ( sysarg in ["--stdout-headers", "-soh"] ):
+			stdout_headers_flag = 1;
+
 
 if ( arg_requested_url != None ):
 	protocol, domain, request_page = split_url(arg_requested_url);	
@@ -123,13 +129,21 @@ if ( methodloop_flag != 1 ):
 	bname = domain+"-"+id+".out";
 	hname = domain+"-headers-"+id+".out";
 	
-	out_file=open(bname, "w");
-	out_file.write(body);
-	out_file.close();
-	
-	out_file=open(hname, "w");
-	out_file.write(headers);
-	out_file.close();
+        print "";
+        if ( stdout_body_flag or stdout_headers_flag ):
+        	if ( stdout_headers_flag ):
+       			print "Headers:\n";
+      			print headers;
+          	if ( stdout_body_flag ):
+               		print "\nBody:\n";
+               		print body;
+    	else:
+        	out_file=open(bname, "w");
+        	out_file.write(body);
+        	out_file.close();
+        	out_file=open(hname, "w");
+          	out_file.write(headers);
+          	out_file.close();
 else:
 	for method in http_methods:
 		print method;
@@ -141,14 +155,21 @@ else:
         	hname = domain+"-headers-"+id+"-"+method+".out";
 
 		print "";
-		print headers;
-        	out_file=open(bname, "w");
-        	out_file.write(body);
-        	out_file.close();
+		if ( stdout_body_flag or stdout_headers_flag ):
+			if ( stdout_headers_flag ): 
+				print "Headers:\n";
+				print headers;
+			if ( stdout_body_flag ):
+				print "\nBody:\n";
+				print body;
+		else:
+	        	out_file=open(bname, "w");
+        		out_file.write(body);
+        		out_file.close();
 
-        	out_file=open(hname, "w");
-        	out_file.write(headers);
-        	out_file.close();
+        		out_file=open(hname, "w");
+        		out_file.write(headers);
+        		out_file.close();
 
 
 ####   END ###################################
