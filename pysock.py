@@ -6,6 +6,7 @@
 import socket
 import sys
 import random
+import ssl 
 from urlparse import urlparse
 #https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
 
@@ -47,22 +48,33 @@ def getAddr(domain):
 
 	return remote_ip;	
 
-def createSocket(protocol):
-	if ( protocol == "https" ): print "suca";
+def createSocket(protocol, ip):
+	if ( protocol == "https" ):
+
+		try:
+        		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
+ 	       	except socket.error:
+        		print "Failed to create socket";
+		
+		wrappedSocket = ssl.wrap_socket(s, ssl_version=ssl.PROTOCOL_TLSv1, ciphers="ALL", server_side=0, cert_reqs=ssl.CERT_NONE);
+		wrappedSocket.connect((ip, 443));
+		return wrappedSocket;
+
 	if ( protocol == "http" ):
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
 		except socket.error:
 			print "Failed to create socket";
+
+		s.connect((ip, 80));
 		return s;
 
 
 def CallWebPage(domain, page, ip, method):
 
-	s = createSocket(protocol);
+	s = createSocket(protocol, ip);
 
 	message = method  + " /" + page + " " + http_options['version'] + "\r\nConnection: Keep-Alive\r\n" + http_options['ua'] + "\r\nHost: " + domain + "\r\n\r\n"; 
-	s.connect((ip, 80));
 
 	try:
 		s.sendall(message)
