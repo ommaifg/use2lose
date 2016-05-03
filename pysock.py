@@ -44,6 +44,7 @@ def split_url(full_uri):
 	return protocol,domain,request_page;
 
 def getAddr(domain):
+	print domain;
 	try:
         	remote_ip = socket.gethostbyname( domain );
 	except socket.gaierror:
@@ -53,23 +54,17 @@ def getAddr(domain):
 	return remote_ip;	
 
 def createSocket(protocol, ip):
-	if ( protocol == "https" ):
+	try:
+        	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
+        except socket.error:
+                print "Failed to create socket";
+	s.settimeout(10);
 
-		try:
-        		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
- 	       	except socket.error:
-        		print "Failed to create socket";
-		
+	if ( protocol == "https" ):
 		wrappedSocket = ssl.wrap_socket(s, ssl_version=ssl.PROTOCOL_TLSv1, ciphers="ALL", server_side=0, cert_reqs=ssl.CERT_NONE);
 		wrappedSocket.connect((ip, 443));
 		return wrappedSocket;
-
 	elif ( protocol == "http" ):
-		try:
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
-		except socket.error:
-			print "Failed to create socket";
-
 		s.connect((ip, 80));
 		return s;
 
@@ -157,6 +152,7 @@ if ( len(sys.argv) > 1 ):
 			stdout_body_flag = 1;
 		if ( sysarg in ["--stdout-headers", "-soh"] ):
 			stdout_headers_flag = 1;
+
 
 if ( arg_requested_url != None ):
 	protocol, domain, request_page = split_url(arg_requested_url);	
