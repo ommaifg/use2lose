@@ -25,6 +25,7 @@ arg_ip = None;
 methodloop_flag = 0;
 stdout_body_flag = 0;
 stdout_headers_flag = 0;
+stdout_flag = 0;
 
 # functions
 def split_url(full_uri):
@@ -37,6 +38,9 @@ def split_url(full_uri):
 		tmp_string = "/" + uri_splitlist[i];
 		request_page += tmp_string; 
 
+	if ( protocol not in ["http", "https"] ):
+		print "Wrong protocol " + protocol;
+		sys.exit();
 	return protocol,domain,request_page;
 
 def getAddr(domain):
@@ -60,7 +64,7 @@ def createSocket(protocol, ip):
 		wrappedSocket.connect((ip, 443));
 		return wrappedSocket;
 
-	if ( protocol == "http" ):
+	elif ( protocol == "http" ):
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
 		except socket.error:
@@ -128,14 +132,17 @@ if ( len(sys.argv) > 1 ):
 		if ( sysarg in ["--stdout-headers", "-soh"] ):
 			stdout_headers_flag = 1;
 
-
 if ( arg_requested_url != None ):
 	protocol, domain, request_page = split_url(arg_requested_url);	
 
+ip = None;
+
 if ( methodloop_flag != 1 ):
 	remote_ip = getAddr(domain);
+	if ( arg_ip != None ): ip = arg_ip;
+	else: ip = remote_ip;
 
-	headers,body = CallWebPage(domain, request_page, remote_ip, http_methods[0]);
+	headers,body = CallWebPage(domain, request_page, ip, http_methods[0]);
 
 	id = str(random.randint(00000000,99999999));
 	bname = domain+"-"+id+".out";
@@ -143,6 +150,11 @@ if ( methodloop_flag != 1 ):
 	
         print "";
         if ( stdout_body_flag or stdout_headers_flag ):
+		print "Domain:\t\t" + domain;
+		print "Page:\t\t" + request_page;
+		print "Real Ip:\t" + remote_ip;
+		print "Request Ip:\t" + ip;
+
         	if ( stdout_headers_flag ):
        			print "Headers:\n";
       			print headers;
@@ -159,8 +171,11 @@ if ( methodloop_flag != 1 ):
 else:
 	for method in http_methods:
 		print method;
+
 		remote_ip = getAddr(domain);
-	        headers,body = CallWebPage(domain, request_page, remote_ip, method);
+		if ( arg_ip != None ): ip = arg_ip;
+		else: ip = remote_ip;
+	        headers,body = CallWebPage(domain, request_page, ip, method);
 
         	id = str(random.randint(00000000,99999999));
         	bname = domain+"-"+id+"-"+method+".out";
