@@ -33,8 +33,6 @@ except socket.error:
 	sys.exit();
 
 
-print domain;
-
 	
 try:
 	remote_ip = socket.gethostbyname( domain );
@@ -47,7 +45,6 @@ if ( arg_ip != "" ):
 	print " Changing " + str(remote_ip)  + " in " + (arg_ip) + " for " + domain + " \n ";
 	remote_ip = arg_ip;
 
-#s.connect((remote_ip, int(port)))
 
 http_command="GET";
 #http_command="UAT";
@@ -56,7 +53,6 @@ http_ua="Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.0.1) Gecko/20060
 
 message = http_command + " /" + page + " " + http_version + "\r\nConnection: Keep-Alive\r\n" + http_ua + "\r\nHost: " + domain + "\r\n\r\n"; 
 print message;
-
 
 s.connect((remote_ip, int(port)));
 
@@ -73,5 +69,14 @@ while ( part != ""):
 	reply += part;
 
 out_file=open("out.html", "w");
-out_file.write(reply);
+out_file.write("");
+out_file.close();
+out_file=open("out.html", "a");
+
+for (index, line ) in enumerate(reply.split("\n")):
+	if ( ( index < 47 ) and ( line != "" ) ):
+		print line;
+	else:
+		out_file.write(line);
+
 out_file.close();
