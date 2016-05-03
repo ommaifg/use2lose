@@ -1,4 +1,8 @@
 #!/usr/bin/python
+#
+# Sorry for potato quality
+#
+
 import socket
 import sys
 import random
