@@ -114,5 +114,4 @@ def callit(url, ip):
 	if not "Location" in reply:
 		print reply;	
 
-callit("anurl.com", '46.30.241.10');
 '''
