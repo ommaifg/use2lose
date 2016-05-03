@@ -73,10 +73,7 @@ out_file.write("");
 out_file.close();
 out_file=open("out.html", "a");
 
-for (index, line ) in enumerate(reply.split("\n")):
-	if ( ( index < 47 ) and ( line != "" ) ):
-		print line;
-	else:
-		out_file.write(line);
+
+print reply;
 
 out_file.close();
