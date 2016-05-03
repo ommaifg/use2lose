@@ -8,6 +8,8 @@ from urlparse import urlparse
 sysarg="";
 arg_url="";
 arg_ip="";
+arg_page="";
+page="";
 port=80;
 
 for ( i, sysarg) in enumerate(sys.argv):
@@ -16,7 +18,14 @@ for ( i, sysarg) in enumerate(sys.argv):
         if ( sysarg in ["--host","-h"] ):
                 arg_ip = sys.argv[i+1];
 try:
-	domain, page = arg_url.split("/");
+	url_split_list = arg_url.split("/");
+	domain = url_split_list[0];
+	del url_split_list[0];
+	for part in url_split_list:
+		page += ( str(part)+"/");
+
+	page = page[:-1];
+
 except ValueError:
 	domain = arg_url;
 	page = "";
@@ -69,12 +78,33 @@ while ( part != ""):
 	part = s.recv(5575)
 	reply += part;
 
-out_file=open("out.html", "w");
+filename = domain + ".out";
+out_file=open(filename, "w");
 out_file.write("");
 out_file.close();
-out_file=open("out.html", "a");
+out_file=open(filename, "a");
 
 
-print reply;
+headers = "";
+body = "";
+headers_ended = 0;
 
+
+for line in reply.splitlines():
+	if ( headers_ended == 0 ):
+		if ( line == '' ):
+			headers_ended = 1;
+			continue;
+		line_forprint=line +"\r\n";
+		headers += line_forprint;
+	else:
+		if ( line == ''):
+			continue;
+		else:
+			line_forprint = line + "\r\n";
+			body += line_forprint;
+		
+
+print headers;
+out_file.write(body);
 out_file.close();
