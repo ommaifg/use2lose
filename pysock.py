@@ -8,6 +8,8 @@ from urlparse import urlparse
 
 def Caller(url, ip):
 	port = 80;
+	url, page = url.split('/');
+	
 	try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
         except socket.error:
@@ -16,17 +18,21 @@ def Caller(url, ip):
 
         try:
                 remote_ip = socket.gethostbyname( url );
-		print "Remote Ip:";
-		print remote_ip;
         except socket.gaierror:
                 # print 'Hostname could not be resolved. Exiting'
                 sys.exit()
 
+	print url;
+	print page;
 	if ( ip != '' ):
                 remote_ip = ip;
 
         s.connect((remote_ip, int(port)))
-        message="GET / HTTP/1.1\r\nConnection: Keep-Aliver\nUser-Agent: Mozilla/5.0 (compatible; Konqueror/3.2; Linux) (KHTML, like Gecko)\r\nHost:  "  + url + "\r\n\r\n";
+        message="GET /" + page + " HTTP/1.1\r\nConnection: Keep-Aliver\nUser-Agent: Mozilla/5.0 (compatible; Konqueror/3.2; Linux) (KHTML, like Gecko)\r\nHost:  "  + url + "\r\n\r\n";
+	
+	print "*****************";
+	print message;
+	print "*****************";
 
 	try:
                 s.sendall(message)
@@ -92,6 +98,7 @@ def callit(url, ip):
 
 	s.connect((remote_ip, int(port)))
 	message="GET / HTTP/1.1\r\nConnection: Keep-Aliver\nUser-Agent: Mozilla/5.0 (compatible; Konqueror/3.2; Linux) (KHTML, like Gecko)\r\nHost:  "  + hostname + "\r\n\r\n";
+
 
 	try:
 		s.sendall(message)
