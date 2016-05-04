@@ -2,6 +2,7 @@
 #
 # Sorry for potato quality
 #
+# hard reset test
 
 import socket
 import sys
