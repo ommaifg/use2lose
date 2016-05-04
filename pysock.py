@@ -2,7 +2,10 @@
 #
 # Sorry for potato quality
 #
+<<<<<<< HEAD
+=======
 # hard reset test
+>>>>>>> 646b71d491511491583dc109ce6872a002788d87
 
 import socket
 import sys
