@@ -117,7 +117,7 @@ class socketMngr(object):
                 		part = self.socket.recv(5575)
                 		reply += part;
 
-        		self.socket.close();
+        	#	self.socket.close();
 		if ( self.my_url_manager.getProto() == 'https'):
                         try:
                                 self.SSLsocket.sendall(message)
@@ -132,8 +132,12 @@ class socketMngr(object):
                                 part = self.SSLsocket.recv(5575)
                                 reply += part;
 
-                        self.SSLsocket.close();
+                #        self.SSLsocket.close();
 		return reply;
+
+	def kill(self):
+		self.SSLsocket.close();
+		self.socket.close();
 
 		
 
@@ -145,17 +149,21 @@ class webMngr(object):
 
 	def __init__(self,socketManager):
 		self.socketMngr = socketManager;
-		print "\nwebMNGR INIT:";
-		print "socketMngr.uri = " + str(self.socketMngr.my_url_manager.getDomain());
-		print "socketMngr.proto = " + str(self.socketMngr.my_url_manager.getProto());
+		if ( dbg ):
+			print "\nwebMNGR INIT:";
+			print "socketMngr.uri = " + str(self.socketMngr.my_url_manager.getDomain());
+			print "socketMngr.proto = " + str(self.socketMngr.my_url_manager.getProto());
 
 	def callPage(self,method):
 		message = method  + " " + str(self.socketMngr.my_url_manager.getWebPage()) + " " + self.http_options['version'] + "\r\nConnection: Keep-Alive\r\n" + self.http_options['ua'] + "\r\nHost: " + str(self.socketMngr.my_url_manager.getDomain()) + "\r\n\r\n"; 
 
 		return self.socketMngr.mySend(message);
 
+	def getHttpMethods(self):
+		return self.http_methods;
+
 # settings
-dbg = 1;
+dbg = 0;
 methodloop_flag = 0;
 stdout_body_flag = 0;
 stdout_headers_flag = 0;
@@ -253,27 +261,20 @@ if ( len(sys.argv) > 1 ):
 url = urlMngr(arg_requested_url);
 s = socketMngr(url, arg_ip, "");
 lynx = webMngr(s);
-print lynx.callPage("GET");
 
-
-'''
-
-if ( methodloop_flag != 1 ):
-	remote_ip = getAddr(domain);
-	if ( arg_ip != None ): ip = arg_ip;
-	else: ip = remote_ip;
-
-	headers,body = CallWebPage(domain, request_page, ip, http_methods[0]);
-
-	antibodi(body,headers);
+if (methodloop_flag != 1 ):
+	url = urlMngr(arg_requested_url);
+	s = socketMngr(url, arg_ip, "");
+	lynx = webMngr(s);
+	reply = lynx.callPage("GET");
 else:
-	for method in http_methods:
+	for method in lynx.getHttpMethods():
+		url = urlMngr(arg_requested_url);
+		s = socketMngr(url, arg_ip, "");
+		lynx = webMngr(s);
 		print method;
-		remote_ip = getAddr(domain);
-		if ( arg_ip != None ): ip = arg_ip;
-		else: ip = remote_ip;
-	        headers,body = CallWebPage(domain, request_page, ip, method);
-		antibodi(body, headers);
-'''
+		reply = lynx.callPage(method);
+
+s.kill();
 
 ####   END ###################################
