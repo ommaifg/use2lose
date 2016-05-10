@@ -1,13 +1,23 @@
 #!/usr/bin/python
 #
-# Sorry for potato quality
+# Sorry for potato-quality code
 #
+#
+
+from urlparse import urlparse
 import socket
 import sys
 import random
 import ssl 
-from urlparse import urlparse
 #https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
+
+#Settings
+dbg = 0;
+methodloop_flag = 0;
+stdout_body_flag = 0;
+stdout_headers_flag = 0;
+stdout_flag = 0;
+
 
 #Classes
 
@@ -136,8 +146,8 @@ class socketMngr(object):
 		return reply;
 
 	def kill(self):
-		self.SSLsocket.close();
-		self.socket.close();
+		if ( self.SSLsocket != "" ): self.SSLsocket.close();
+		if ( self.socket != "" ): self.socket.close();
 
 		
 
@@ -162,14 +172,95 @@ class webMngr(object):
 	def getHttpMethods(self):
 		return self.http_methods;
 
+class outputMngr(object):
+	reply = "";
+	headers = "";
+	body = "";
+	
+	def __init__(self,reply):
+		self.reply = reply;
+		print reply;
+		
+
 # settings
-dbg = 0;
-methodloop_flag = 0;
-stdout_body_flag = 0;
-stdout_headers_flag = 0;
-stdout_flag = 0;
+
 
 	
+
+def antibodi(body, headers):
+	id = str(random.randint(00000000,99999999));
+        bname = domain+"-"+id+".out";
+        hname = domain+"-headers-"+id+".out";
+
+        print "";
+        if ( stdout_body_flag or stdout_headers_flag ):
+                print "Domain:\t\t" + domain;
+                print "Page:\t\t" + request_page;
+                print "Real Ip:\t" + remote_ip;
+                print "Request Ip:\t" + ip;
+
+                if ( stdout_headers_flag ):
+                        print "Headers:\n";
+                        print headers;
+                if ( stdout_body_flag ):
+                        print "\nBody:\n";
+                        print body;
+        else:
+                out_file=open(bname, "w");
+                out_file.write(body);
+                out_file.close();
+                out_file=open(hname, "w");
+                out_file.write(headers);
+                out_file.close();
+
+	
+
+
+####### MAIN ##########################
+
+# get args
+arg_requested_url="";
+arg_ip ="";
+if ( len(sys.argv) > 1 ):
+	for ( i, sysarg) in enumerate(sys.argv):
+        	if ( sysarg in ["--url", "-u"] ):
+                	arg_requested_url=sys.argv[i+1];
+        	if ( sysarg in ["--host", "-h"] ):
+                	arg_ip=sys.argv[i+1];
+		if ( sysarg in ["--loopmethods", "-lp"] ):
+			methodloop_flag = 1;
+		if ( sysarg in ["--stdout-body", "-sob"] ):
+			stdout_body_flag = 1;
+		if ( sysarg in ["--stdout-headers", "-soh"] ):
+			stdout_headers_flag = 1;
+
+
+url = urlMngr(arg_requested_url);
+s = socketMngr(url, arg_ip, "");
+lynx = webMngr(s);
+
+if (methodloop_flag != 1 ):
+	url = urlMngr(arg_requested_url);
+	s = socketMngr(url, arg_ip, "");
+	lynx = webMngr(s);
+	reply = lynx.callPage("GET");
+	print reply;
+else:
+	for method in lynx.getHttpMethods():
+		url = urlMngr(arg_requested_url);
+		s = socketMngr(url, arg_ip, "");
+		lynx = webMngr(s);
+		print method;
+		reply = lynx.callPage(method);
+
+s.kill();
+
+####   END ###################################
+
+
+''' 
+RAMASUGLIA:
+
 def CallWebPage(domain, page, ip, method):
 
 	s = createSocket(protocol, ip);
@@ -208,73 +299,4 @@ def CallWebPage(domain, page, ip, method):
 				line_forprint = line + "\r\n";
 				body += line_forprint;
 	return headers,body;
-
-
-def antibodi(body, headers):
-	id = str(random.randint(00000000,99999999));
-        bname = domain+"-"+id+".out";
-        hname = domain+"-headers-"+id+".out";
-
-        print "";
-        if ( stdout_body_flag or stdout_headers_flag ):
-                print "Domain:\t\t" + domain;
-                print "Page:\t\t" + request_page;
-                print "Real Ip:\t" + remote_ip;
-                print "Request Ip:\t" + ip;
-
-                if ( stdout_headers_flag ):
-                        print "Headers:\n";
-                        print headers;
-                if ( stdout_body_flag ):
-                        print "\nBody:\n";
-                        print body;
-        else:
-                out_file=open(bname, "w");
-                out_file.write(body);
-                out_file.close();
-                out_file=open(hname, "w");
-                out_file.write(headers);
-                out_file.close();
-
-	
-
-####### MAIN ##########################
-
-# get args
-
-arg_requested_url="";
-arg_ip ="";
-if ( len(sys.argv) > 1 ):
-	for ( i, sysarg) in enumerate(sys.argv):
-        	if ( sysarg in ["--url", "-u"] ):
-                	arg_requested_url=sys.argv[i+1];
-        	if ( sysarg in ["--host", "-h"] ):
-                	arg_ip=sys.argv[i+1];
-		if ( sysarg in ["--loopmethods", "-lp"] ):
-			methodloop_flag = 1;
-		if ( sysarg in ["--stdout-body", "-sob"] ):
-			stdout_body_flag = 1;
-		if ( sysarg in ["--stdout-headers", "-soh"] ):
-			stdout_headers_flag = 1;
-
-
-url = urlMngr(arg_requested_url);
-s = socketMngr(url, arg_ip, "");
-lynx = webMngr(s);
-
-if (methodloop_flag != 1 ):
-	url = urlMngr(arg_requested_url);
-	s = socketMngr(url, arg_ip, "");
-	lynx = webMngr(s);
-	reply = lynx.callPage("GET");
-else:
-	for method in lynx.getHttpMethods():
-		url = urlMngr(arg_requested_url);
-		s = socketMngr(url, arg_ip, "");
-		lynx = webMngr(s);
-		print method;
-		reply = lynx.callPage(method);
-
-s.kill();
-
-####   END ###################################
+'''
